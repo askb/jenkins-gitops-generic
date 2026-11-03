@@ -170,7 +170,8 @@ jenkins_api() { # path [curl args...]
 run_smoke_build() {
   local venv="$state/venv" jjbini="$state/jjb.ini" deadline result console
   # Always the pinned JJB in a private venv, never whatever is on PATH.
-  [[ -x "$venv/bin/jenkins-jobs" ]] || { python3 -m venv "$venv" && "$venv/bin/pip" install -q 'jenkins-job-builder==6.4.3'; }
+  # JJB 6.4.3 imports pkg_resources, which new venvs no longer include.
+  [[ -x "$venv/bin/jenkins-jobs" ]] || { python3 -m venv "$venv" && "$venv/bin/pip" install -q 'jenkins-job-builder==6.4.3' 'setuptools<81'; }
   cat > "$jjbini" <<EOF
 [jenkins]
 url=http://127.0.0.1:$JENKINS_PORT/

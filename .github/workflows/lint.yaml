@@ -96,4 +96,5 @@ jobs:
           done
 
       - name: JJB test jobs render
-        run: uvx --from 'jenkins-job-builder==6.4.3' jenkins-jobs test tests/jjb > /dev/null
+        # JJB 6.4.3 imports pkg_resources, which new venvs no longer include.
+        run: uvx --with 'setuptools<81' --from 'jenkins-job-builder==6.4.3' jenkins-jobs test tests/jjb > /dev/null
