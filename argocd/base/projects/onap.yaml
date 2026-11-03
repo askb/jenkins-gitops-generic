@@ -1,0 +1,24 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+# One AppProject per LF project: it may only deploy into its own
+# <project>-jenkins-* namespaces.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: onap
+  namespace: argocd
+spec:
+  description: onap Jenkins
+  sourceRepos:
+    - https://github.com/askb/jenkins-gitops-generic.git
+    - https://charts.jenkins.io
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: onap-jenkins-*
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

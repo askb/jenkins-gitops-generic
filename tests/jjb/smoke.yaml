@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Pushed by scripts/e2e.sh with jenkins-jobs (JJB), the same way ci-management
+# repos push jobs today. Runs on a Kubernetes pod agent (label ci-pod).
+- job:
+    name: gitops-smoke
+    project-type: freestyle
+    node: ci-pod
+    description: End-to-end smoke job for jenkins-gitops.
+    wrappers:
+      - timestamps
+    builders:
+      - shell: |
+          #!/bin/bash
+          # Plain $VAR form: JJB expands brace syntax as its own parameters.
+          set -euo pipefail
+          echo "GITOPS_SMOKE_OK on $NODE_NAME"
+          echo "SILO=$SILO"
+          echo "JENKINS_HOSTNAME=$JENKINS_HOSTNAME"

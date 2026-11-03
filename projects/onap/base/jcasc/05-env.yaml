@@ -1,0 +1,31 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Global node env vars (sample), from onap/jenkins-gitops 00-jenkins.yaml.
+jenkins:
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: CONTAINER_PULL_REGISTRY
+            value: nexus3.onap.org:10003
+          - key: CONTAINER_PUSH_REGISTRY
+            value: nexus3.onap.org:10002
+          - key: DOCKER_REGISTRY
+            value: nexus3.onap.org
+          - key: GERRIT_URL
+            value: https://gerrit.onap.org/r
+          - key: GIT_BASE
+            value: git://cloud.onap.org/mirror/$PROJECT.git
+          - key: JENKINS_HOSTNAME
+            value: ${JENKINS_HOSTNAME}
+          - key: MASTER_RTD_PROJECT
+            value: ${MASTER_RTD_PROJECT}
+          - key: NEXUS_URL
+            value: https://nexus.onap.org
+          - key: NEXUSPROXY
+            value: https://nexus.onap.org
+          - key: SIGUL_KEY
+            value: ${SIGUL_KEY}
+          - key: SILO
+            value: ${SILO}

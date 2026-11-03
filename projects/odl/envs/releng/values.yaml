@@ -1,0 +1,22 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Not deployed anywhere yet (prototype). jenkins.opendaylight.org serves
+# both silos from one host, split by path.
+controller:
+  image:
+    # Set by the release workflow to <jenkinsVersion>-<git sha>.
+    tag: "2.580.2"
+  jenkinsUriPrefix: /releng
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostName: jenkins.opendaylight.org
+    path: /releng
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+    tls:
+      - secretName: jenkins-opendaylight-org-tls
+        hosts:
+          - jenkins.opendaylight.org

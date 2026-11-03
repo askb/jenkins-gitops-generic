@@ -1,0 +1,27 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# One Gerrit server, parameterised from jenkins-env. CI sets
+# GERRIT_NO_CONNECTION_ON_STARTUP=true so nothing reaches a real Gerrit.
+unclassified:
+  gerrit-trigger:
+    pluginConfig:
+      numberOfReceivingWorkerThreads: 3
+      numberOfSendingWorkerThreads: 1
+    servers:
+      - name: ${GERRIT_HOST}
+        noConnectionOnStartup: ${GERRIT_NO_CONNECTION_ON_STARTUP:-false}
+        config:
+          gerritHostName: ${GERRIT_HOST}
+          gerritSshPort: 29418
+          gerritUserName: ${GERRIT_USER}
+          gerritEMail: ${GERRIT_EMAIL}
+          gerritFrontEndUrl: ${GERRIT_FRONTEND_URL}
+          gerritAuthKeyFile: /run/secrets/jcasc/gerrit-ssh-private-key
+          useRestApi: false
+          categories:
+            - verdictDescription: Code Review
+              verdictValue: Code-Review
+            - verdictDescription: Verified
+              verdictValue: Verified

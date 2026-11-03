@@ -1,0 +1,27 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - secret-store.yaml
+
+# Order matters: later components merge into earlier generators.
+components:
+  - ../../../../common
+  - ../../base
+  - ../../../../common/features/gerrit-trigger
+  - ../../../../common/features/lf-sso
+
+configMapGenerator:
+  - name: jenkins-env
+    options:
+      disableNameSuffixHash: true
+    literals:
+      - JENKINS_URL=https://jenkins.onap.org/sandbox/
+      - SILO=sandbox
+      - JENKINS_HOSTNAME=vex-yul-ecomp-jenkins-2
+      - SIGUL_KEY=onap-sandbox
+      - MASTER_RTD_PROJECT=doc-test
+      - OPENSTACK_INSTANCE_CAP=10

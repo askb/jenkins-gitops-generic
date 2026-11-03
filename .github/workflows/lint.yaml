@@ -1,0 +1,99 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+# Static checks, no cluster: pre-commit hooks, a Zizmor audit of the
+# workflows, and validation of every project/env (chart + kustomize render,
+# kubeconform, secret-key coverage, ArgoCD overlays, JJB test jobs).
+
+name: Lint
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+
+      - name: Run hooks
+        env:
+          # gitlint checks commit messages, not files.
+          SKIP: gitlint
+        run: uvx prek run --all-files --show-diff-on-failure
+
+  zizmor:
+    name: Zizmor workflow audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+
+      - name: Audit
+        run: uvx zizmor --persona auditor --no-online-audits .github/workflows
+
+  validate:
+    name: Render and validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+
+      - name: Install tools
+        run: |
+          scripts/install-tools.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Secret keys match JCasC
+        run: scripts/check-secret-keys.sh
+
+      - name: Render every project/env (helm + kustomize + kubeconform)
+        run: scripts/render.sh
+
+      - name: Render ArgoCD overlays
+        run: |
+          set -euo pipefail
+          for d in argocd/clusters/*/; do
+            echo "==> $d"
+            kustomize build "$d" | kubeconform -strict -summary -ignore-missing-schemas
+          done
+
+      - name: JJB test jobs render
+        run: uvx --from 'jenkins-job-builder==6.4.3' jenkins-jobs test tests/jjb > /dev/null

@@ -1,0 +1,20 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Throwaway k3d cluster (scripts/e2e.sh). The image is built in the same CI
+# run and imported into k3d, so it is never pulled.
+controller:
+  image:
+    registry: docker.io
+    repository: library/jenkins-odl
+    tag: ci
+    pullPolicy: Never
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      memory: 2Gi
+persistence:
+  size: 2Gi

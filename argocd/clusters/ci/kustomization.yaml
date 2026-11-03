@@ -1,0 +1,37 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Throwaway k3d cluster used by scripts/e2e.sh and the e2e workflow.
+# ArgoCD reads this repo from the in-cluster git daemon (scripts/e2e.sh
+# pushes the working tree there), so CI tests the exact commit under test
+# without any credentials or access to GitHub from the cluster.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: ApplicationSet
+      name: jenkins
+    patch: |-
+      - op: replace
+        path: /spec/generators/0/git/repoURL
+        value: git://git-server.git.svc/jenkins-gitops.git
+      - op: replace
+        path: /spec/generators/0/selector/matchLabels/cluster
+        value: ci
+      - op: replace
+        path: /spec/template/spec/sources/1/repoURL
+        value: git://git-server.git.svc/jenkins-gitops.git
+      - op: replace
+        path: /spec/template/spec/sources/2/repoURL
+        value: git://git-server.git.svc/jenkins-gitops.git
+  - target:
+      kind: AppProject
+    patch: |-
+      - op: add
+        path: /spec/sourceRepos/-
+        value: git://git-server.git.svc/jenkins-gitops.git

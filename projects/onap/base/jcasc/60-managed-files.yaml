@@ -1,0 +1,46 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Sample from onap/jenkins-gitops 60-managed-files.yaml.
+unclassified:
+  globalConfigFiles:
+    configs:
+      - openstackUserData:
+          id: jenkins-init-script
+          name: jenkins-init-script
+          comment: CI management init
+          content: |
+            #!/bin/bash
+            until host github.com &>/dev/null
+            do
+                echo "Waiting until github.com is resolvable..."
+            done
+            git clone https://github.com/lfit/releng-global-jjb.git /opt/ciman/global-jjb
+            /opt/ciman/global-jjb/jenkins-init-scripts/init.sh
+      - custom:
+          id: ansible-cfg
+          name: ansible-cfg
+          comment: ansible config file
+          content: |
+            [defaults]
+            remote_tmp = ~/.ansible/tmp
+      - globalMavenSettings:
+          id: global-settings
+          name: global-settings
+          comment: Maven Global Settings file
+          isReplaceAll: true
+          content: |
+            <?xml version="1.0" encoding="UTF-8"?>
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <mirrors>
+                <mirror>
+                  <id>release-mirror</id>
+                  <name>Local Nexus mirror for builds</name>
+                  <url>^${env.NEXUSPROXY}/content/repositories/public/</url>
+                  <mirrorOf>central</mirrorOf>
+                </mirror>
+              </mirrors>
+            </settings>

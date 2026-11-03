@@ -1,0 +1,29 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - secret-store.yaml
+
+# Order matters: later components merge into earlier generators.
+components:
+  - ../../../../common
+  - ../../base
+  - ../../../../common/features/gerrit-trigger
+  - ../../../../common/features/lf-sso
+
+configMapGenerator:
+  - name: jenkins-env
+    options:
+      disableNameSuffixHash: true
+    literals:
+      - JENKINS_URL=https://jenkins.opendaylight.org/sandbox/
+      - SILO=sandbox
+      - JENKINS_HOSTNAME=vex-yul-odl-jenkins-2
+      - SIGUL_KEY=odl-sandbox
+      - OPENSTACK_INSTANCE_CAP=8
+      - GERRIT_USER=jenkins-sandbox
+      - MAVEN_DEPLOY_CREDENTIAL=dummy
+      - MAVEN_OSSRH_CREDENTIAL=dummy

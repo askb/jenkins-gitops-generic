@@ -1,0 +1,20 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Shared controller settings. JCasC merges every file in the casc folder:
+# maps merge, lists concatenate, and a scalar set twice is an error, so
+# each scalar lives in exactly one file.
+jenkins:
+  systemMessage: ${JENKINS_SYSTEM_MESSAGE:-Managed by jenkins-gitops. Manual changes are overwritten.}
+  numExecutors: 0
+  mode: EXCLUSIVE
+  quietPeriod: 1
+  scmCheckoutRetryCount: 3
+  crumbIssuer: standard
+  markupFormatter:
+    rawHtml:
+      disableSyntaxHighlighting: false
+  disableRememberMe: false
+  remotingSecurity:
+    enabled: true

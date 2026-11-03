@@ -1,0 +1,16 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# LF SSO (SAML) login for real envs. CI envs use ci-local instead.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+configMapGenerator:
+  - name: jenkins-jcasc-realm
+    files:
+      - 14-realm.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        jenkins-jenkins-config: "true"

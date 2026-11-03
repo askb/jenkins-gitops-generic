@@ -1,0 +1,30 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Permissions for LF SSO groups. CI replaces this file
+# (common/features/ci-local/15-authz.yaml).
+jenkins:
+  authorizationStrategy:
+    globalMatrix:
+      entries:
+        - group:
+            name: anonymous
+            permissions:
+              - Job/Read
+              - Overall/Read
+              - View/Read
+        - group:
+            name: authenticated
+            permissions:
+              - Job/Read
+              - Overall/Read
+              - View/Read
+        - group:
+            name: lf-releng
+            permissions:
+              - Overall/Administer
+        - group:
+            name: lf-sysops
+            permissions:
+              - Overall/Administer

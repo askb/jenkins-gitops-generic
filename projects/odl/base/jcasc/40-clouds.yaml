@@ -1,0 +1,55 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# From builder/jenkins-config/clouds/openstack/odlvex/. Only a sample of the
+# 41 templates is here; a migration script would generate the full list.
+# Nothing contacts OpenStack until a job asks for one of these labels.
+jenkins:
+  clouds:
+    - openstack:
+        name: odlvex
+        credentialsId: os-cloud
+        endPointUrl: https://auth.vexxhost.net/v3
+        ignoreSsl: false
+        zone: ca-ymq-1
+        slaveOptions:
+          bootSource:
+            image:
+              name: ZZCI - Ubuntu 22.04 - builder - x86_64 - 20261001-010126.490
+          hardwareId: v3-standard-2
+          networkId: b5fcd86e-efac-4997-b8bc-dbe0d35bc229
+          userDataId: jenkins-init-script
+          instanceCap: ${OPENSTACK_INSTANCE_CAP}
+          securityGroups: default
+          startTimeout: 600000
+          keyPairName: jenkins-ssh
+          numExecutors: 1
+          fsRoot: /w
+          retentionTime: 0
+          launcherFactory:
+            ssh:
+              credentialsId: jenkins-ssh
+        templates:
+          - name: ${SILO}-ubuntu2204-builder-2c-2g
+            labels: ubuntu2204-builder-2c-2g
+            slaveOptions:
+              hardwareId: v3-standard-2
+          - name: ${SILO}-ubuntu2204-builder-4c-4g
+            labels: ubuntu2204-builder-4c-4g
+            slaveOptions:
+              hardwareId: v3-standard-4
+          - name: ${SILO}-ubuntu2204-docker-4c-4g
+            labels: ubuntu2204-docker-4c-4g
+            slaveOptions:
+              bootSource:
+                image:
+                  name: ZZCI - Ubuntu 22.04 - docker - x86_64 - 20261001-170112.024
+              hardwareId: v3-standard-4
+          - name: ${SILO}-ubuntu2404-builder-8c-32g
+            labels: ubuntu2404-builder-8c-32g
+            slaveOptions:
+              bootSource:
+                image:
+                  name: ZZCI - Ubuntu 24.04 - builder - x86_64 - 20261001-000116.342
+              hardwareId: v3-standard-8

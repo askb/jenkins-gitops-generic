@@ -1,0 +1,19 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Optional feature for projects that build from Gerrit. Needs jenkins-env
+# keys GERRIT_HOST, GERRIT_USER, GERRIT_EMAIL, GERRIT_FRONTEND_URL and the
+# secret key gerrit-ssh-private-key. GERRIT_NO_CONNECTION_ON_STARTUP
+# defaults to false.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+configMapGenerator:
+  - name: jenkins-jcasc-gerrit
+    files:
+      - 70-gerrit-trigger.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        jenkins-jenkins-config: "true"

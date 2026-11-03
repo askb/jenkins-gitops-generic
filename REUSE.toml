@@ -1,0 +1,10 @@
+version = 1
+
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+# Files that cannot carry a header of their own.
+[[annotations]]
+path = ["projects/*/plugins.lock.txt", "projects/*/secret-keys.txt", ".dockerignore"]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 The Linux Foundation"

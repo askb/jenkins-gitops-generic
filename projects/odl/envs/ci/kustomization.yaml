@@ -1,0 +1,25 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Order matters: later components merge into earlier generators.
+components:
+  - ../../../../common
+  - ../../base
+  - ../../../../common/features/gerrit-trigger
+  - ../../../../common/features/ci-local
+
+configMapGenerator:
+  - name: jenkins-env
+    options:
+      disableNameSuffixHash: true
+    literals:
+      - JENKINS_URL=http://localhost:8080/
+      - SILO=ci
+      - JENKINS_HOSTNAME=ci-odl-jenkins
+      - SIGUL_KEY=none
+      - OPENSTACK_INSTANCE_CAP=0
+      - GERRIT_USER=jenkins-ci
+      - GERRIT_NO_CONNECTION_ON_STARTUP=true

@@ -1,0 +1,70 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# One Application per projects/<project>/envs/<env>/env.yaml whose
+# "cluster" matches this cluster (set by argocd/clusters/<cluster>).
+# Adding a project or env is a directory in git, nothing here changes.
+#
+# Each Application has three sources:
+#   1. the upstream jenkins chart at the env's chartVersion, with values
+#      layered common -> project -> env from this repo;
+#   2. this repo, as the $repo reference for those value files;
+#   3. the env's kustomize dir (JCasC ConfigMaps, ExternalSecret, store).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: jenkins
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/askb/jenkins-gitops-generic.git
+        revision: main
+        files:
+          - path: projects/*/envs/*/env.yaml
+      selector:
+        matchLabels:
+          cluster: CLUSTER
+  template:
+    metadata:
+      name: "{{.project}}-jenkins-{{.env}}"
+      labels:
+        jenkins-gitops/project: "{{.project}}"
+        jenkins-gitops/env: "{{.env}}"
+    spec:
+      project: "{{.project}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{.project}}-jenkins-{{.env}}"
+      sources:
+        - repoURL: https://charts.jenkins.io
+          chart: jenkins
+          targetRevision: "{{.chartVersion}}"
+          helm:
+            releaseName: jenkins
+            valueFiles:
+              - $repo/common/values.yaml
+              - $repo/projects/{{.project}}/values.yaml
+              - $repo/projects/{{.project}}/envs/{{.env}}/values.yaml
+        - repoURL: https://github.com/askb/jenkins-gitops-generic.git
+          targetRevision: main
+          ref: repo
+        - repoURL: https://github.com/askb/jenkins-gitops-generic.git
+          targetRevision: main
+          path: "projects/{{.project}}/envs/{{.env}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 15s
+            factor: 2
+            maxDuration: 5m

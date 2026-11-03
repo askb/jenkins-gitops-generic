@@ -1,0 +1,63 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+# Minimal git remote for local testing: `git daemon` serving bare
+# repositories over the git:// protocol, with pushes enabled.
+# scripts/e2e.sh pushes the working tree here and ArgoCD fetches from
+# git://git-server.git.svc/jenkins-gitops.git
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: git
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-server
+  namespace: git
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-server
+  template:
+    metadata:
+      labels:
+        app: git-server
+    spec:
+      containers:
+        - name: git-daemon
+          image: alpine:3.21
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache git git-daemon >/dev/null
+              git init -q --bare /repos/jenkins-gitops.git
+              git -C /repos/jenkins-gitops.git symbolic-ref HEAD refs/heads/main
+              exec git daemon --base-path=/repos --export-all \
+                --enable=receive-pack --reuseaddr --verbose --port=9418
+          ports:
+            - containerPort: 9418
+          readinessProbe:
+            tcpSocket:
+              port: 9418
+            periodSeconds: 2
+          volumeMounts:
+            - name: repos
+              mountPath: /repos
+      volumes:
+        - name: repos
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-server
+  namespace: git
+spec:
+  selector:
+    app: git-server
+  ports:
+    - port: 9418
+      targetPort: 9418

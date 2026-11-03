@@ -1,0 +1,30 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+configMapGenerator:
+  - name: jenkins-jcasc-project
+    files:
+      - jcasc/05-env.yaml
+      - jcasc/15-authz.yaml
+      - jcasc/40-clouds.yaml
+      - jcasc/50-credentials.yaml
+      - jcasc/60-managed-files.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        jenkins-jenkins-config: "true"
+  # Project defaults for JCasC ${UPPER_CASE} vars; envs override them in
+  # their own jenkins-env ConfigMap.
+  - name: jenkins-env-project
+    options:
+      disableNameSuffixHash: true
+    literals:
+      - JENKINS_ADMIN_ADDRESS=jenkins-dontreply@opendaylight.org
+      - GERRIT_HOST=git.opendaylight.org
+      - GERRIT_FRONTEND_URL=https://git.opendaylight.org/gerrit/
+      - GERRIT_EMAIL=jenkins-dontreply@opendaylight.org
+      - MAVEN_DEPLOY_CREDENTIAL=deployment-odlparent
+      - MAVEN_OSSRH_CREDENTIAL=ossrh

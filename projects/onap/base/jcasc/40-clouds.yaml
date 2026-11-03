@@ -1,0 +1,39 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Sample of the "cattle" cloud from onap/jenkins-gitops 40-clouds.yaml.
+jenkins:
+  clouds:
+    - openstack:
+        name: cattle
+        credentialsId: vexx-ecompci
+        endPointUrl: https://auth.vexxhost.net/v3
+        ignoreSsl: false
+        slaveOptions:
+          bootSource:
+            image:
+              name: ZZCI - Ubuntu 22.04 - builder - x86_64 - 20261024-182203.123
+          fsRoot: /w
+          hardwareId: 5f1eb09f-e764-4642-a16f-a7230ec025e7
+          instanceCap: ${OPENSTACK_INSTANCE_CAP}
+          keyPairName: jenkins
+          launcherFactory:
+            ssh:
+              credentialsId: jenkins
+          networkId: bd089be9-e846-4afe-905b-8bb6c7c90faf
+          retentionTime: 1
+          userDataId: jenkins-init-script
+        templates:
+          - name: ${SILO}-ubuntu2204-builder-4c-4g
+            labels: ubuntu2204-builder-4c-4g
+            slaveOptions:
+              retentionTime: 0
+          - name: ${SILO}-ubuntu2204-docker-8c-8g
+            labels: ubuntu2204-docker-8c-8g
+            slaveOptions:
+              bootSource:
+                image:
+                  name: ZZCI - Ubuntu 22.04 - docker - x86_64 - 20261023-072101.331
+              hardwareId: 47d3707a-c6c6-46ea-a15b-095e336b1edc
+              retentionTime: 0

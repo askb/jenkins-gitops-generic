@@ -1,0 +1,25 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+extends: default
+
+# JCasC files carry long literal bodies (settings.xml, scripts), so
+# line-length stays a warning.
+
+rules:
+  empty-lines:
+    max-end: 1
+  comments:
+    min-spaces-from-content: 1
+    level: error
+  line-length:
+    max: 120
+    level: warning
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+  document-start:
+    present: true
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']

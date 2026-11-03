@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Plugins every project gets. Names only; scripts/pin-plugins.sh resolves
+# versions and writes projects/<name>/plugins.lock.txt.
+antisamy-markup-formatter
+build-timeout
+cloudbees-folder
+conditional-buildstep
+config-file-provider
+configuration-as-code
+credentials
+credentials-binding
+description-setter
+email-ext
+envinject
+git
+jobConfigHistory
+kubernetes
+lockable-resources
+mailer
+matrix-auth
+parameterized-trigger
+plain-credentials
+postbuildscript
+rebuild
+saml
+ssh-agent
+ssh-credentials
+ssh-slaves
+timestamper
+workflow-aggregator
+ws-cleanup

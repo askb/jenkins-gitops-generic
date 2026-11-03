@@ -1,0 +1,8 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+# Project-wide settings read by scripts/ and CI (not by ArgoCD).
+name: onap
+description: ONAP Jenkins (jenkins.onap.org)
+jenkinsVersion: 2.580.2
+image: ghcr.io/askb/jenkins-onap

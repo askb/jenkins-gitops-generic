@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Plugin pins such as "asm-api:9.9.1-189.vb_5ef2964da_91" look like API
+# keys to the generic rule. Only the lock files are allowlisted.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Jenkins plugin lock files (plugin:version)"
+paths = ['''^projects/[^/]+/plugins\.lock\.txt$''']

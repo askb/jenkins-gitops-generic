@@ -1,0 +1,73 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+# Whole stack per project on a throwaway k3d cluster inside the runner:
+# image build -> JCasC smoke test of every env (no network) -> ArgoCD +
+# External Secrets + in-cluster git -> Jenkins -> JJB job on a pod agent ->
+# JCasC change in git reloads Jenkins. Nothing outside the runner is used
+# except public images, charts and packages.
+
+name: E2E
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E (${{ matrix.project }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [odl, onap]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install tools
+        run: |
+          scripts/install-tools.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+
+      - name: Build jenkins-${{ matrix.project }}:ci
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          file: image/Dockerfile
+          build-args: PROJECT=${{ matrix.project }}
+          tags: jenkins-${{ matrix.project }}:ci
+          load: true
+          push: false
+
+      - name: JCasC smoke test (every env, no network)
+        env:
+          PROJECT: ${{ matrix.project }}
+        run: |
+          set -euo pipefail
+          for d in projects/"$PROJECT"/envs/*/; do
+            scripts/casc-smoke-test.sh "$PROJECT" "$(basename "$d")"
+          done
+
+      - name: End-to-end on k3d
+        env:
+          PROJECT: ${{ matrix.project }}
+        run: scripts/e2e.sh all "$PROJECT"

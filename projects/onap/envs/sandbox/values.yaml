@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Not deployed anywhere yet (prototype).
+controller:
+  image:
+    # Set by the release workflow to <jenkinsVersion>-<git sha>.
+    tag: "2.580.2"
+  jenkinsUriPrefix: /sandbox
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostName: jenkins.onap.org
+    path: /sandbox
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+    tls:
+      - secretName: jenkins-onap-org-tls
+        hosts:
+          - jenkins.onap.org

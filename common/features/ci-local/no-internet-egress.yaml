@@ -1,0 +1,24 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# CI only: pods in the Jenkins namespace (controller and build agents) may
+# talk to private addresses (cluster, k3d node) but not to the internet, so
+# a CI run can never reach a real Gerrit, OpenStack, Nexus or SSO.
+# scripts/e2e.sh checks this from inside the controller.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: no-internet-egress
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+        - ipBlock:
+            cidr: 172.16.0.0/12
+        - ipBlock:
+            cidr: 192.168.0.0/16

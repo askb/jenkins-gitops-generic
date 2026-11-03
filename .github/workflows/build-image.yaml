@@ -1,0 +1,84 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+# Publish each project's controller image to this repository owner's GHCR
+# (prototype: ghcr.io/<owner>/jenkins-<project>) after a merge to main.
+# Tags: <jenkinsVersion> and <jenkinsVersion>-<short sha>.
+
+name: Build image
+
+"on":
+  push:
+    branches: [main]
+    paths:
+      - image/**
+      - common/plugins.txt
+      - projects/*/plugins.lock.txt
+      - projects/*/project.yaml
+      - .github/workflows/build-image.yaml
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Publish jenkins-${{ matrix.project }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write  # push jenkins-<project> to this owner's GHCR
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [odl, onap]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Image tags
+        id: meta
+        env:
+          PROJECT: ${{ matrix.project }}
+          OWNER: ${{ github.repository_owner }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          version="$(yq -r .jenkinsVersion "projects/$PROJECT/project.yaml")"
+          image="ghcr.io/${OWNER,,}/jenkins-$PROJECT"
+          {
+            echo "version=$version"
+            echo "tags<<EOF"
+            echo "$image:$version"
+            echo "$image:$version-${SHA::7}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6  # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          file: image/Dockerfile
+          build-args: |
+            PROJECT=${{ matrix.project }}
+            JENKINS_VERSION=${{ steps.meta.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          push: true
+          provenance: false

@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+[general]
+# gitlint is switching its regex options to 'search' semantics; opting
+# in now also silences the deprecation warning.
+regex-style-search=true
+contrib=contrib-title-conventional-commits,contrib-body-requires-signed-off-by
+
+[title-max-length]
+line-length=50
+
+# CT1 validates the type and stops at the colon, so this requires a
+# capital in the description too. The leading anchor is required: the
+# rule calls search(), so an unanchored pattern never fails. The
+# optional '!' keeps the breaking-change marker valid.
+[title-match-regex]
+regex=^[A-Z][a-zA-Z]*(\([^)]+\))?!?: [A-Z]
+
+[body-max-line-length]
+line-length=72
+
+# CT1 defaults to lowercase types and would reject every type in use
+[contrib-title-conventional-commits]
+types=Fix,Feat,Chore,Docs,Style,Refactor,Perf,Test,Revert,CI,Build
+
+# A DCO trailer cannot be wrapped and CC1 makes one mandatory, so B1 is
+# waived for a body carrying an over-long one. [ignore-body-lines]
+# cannot serve here: it strips the line before CC1 sees it, and the
+# sign-off check then fails instead.
+[ignore-by-body]
+regex=^(?=(Signed-off-by|Co-authored-by): ).{73,}
+ignore=B1
+
+[ignore-body-lines]
+regex=(.*)https?://(.*)

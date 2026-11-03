@@ -1,0 +1,23 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# CI only: a Kubernetes cloud in the controller's own namespace, so the
+# end-to-end test can run a real build without OpenStack.
+jenkins:
+  clouds:
+    - kubernetes:
+        name: ci-pods
+        jenkinsUrl: http://jenkins:8080${JENKINS_URI_PREFIX:-}
+        webSocket: true
+        containerCapStr: "2"
+        templates:
+          - name: ci-pod
+            label: ci-pod
+            nodeUsageMode: EXCLUSIVE
+            idleMinutes: 0
+            containers:
+              - name: jnlp
+                image: jenkins/inbound-agent:3395.v6e5377b_0fb_3c-3-jdk21
+                resourceRequestCpu: 100m
+                resourceRequestMemory: 256Mi

@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Plugins on top of common/plugins.txt.
+gerrit-trigger
+openstack-cloud
+robot
+throttle-concurrents

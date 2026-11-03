@@ -1,0 +1,79 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# From builder/jenkins-config/managed-config-files/ (sample of the 82 Maven
+# settings). ^${...} escapes a literal ${...} from JCasC substitution.
+# MAVEN_DEPLOY_CREDENTIAL is deployment-odlparent in releng, dummy in sandbox.
+unclassified:
+  globalConfigFiles:
+    configs:
+      - openstackUserData:
+          id: jenkins-init-script
+          name: jenkins-init-script
+          comment: Run ci-management/jenkins-scripts/init_system.sh
+          content: |
+            #!/bin/bash
+            until host github.com &>/dev/null
+            do
+                echo "Waiting until github.com is resolvable..."
+            done
+            git clone --recursive https://github.com/opendaylight/releng-builder.git /opt/ciman
+            /opt/ciman/global-jjb/jenkins-init-scripts/init.sh
+      - custom:
+          id: clouds-yaml
+          name: clouds-yaml
+          comment: Cloud auth credentials file
+          content: |
+            clouds:
+              vex:
+                auth:
+                  project_name: "61975f2c-7c17-4d69-82fa-c3ae420ad6fd"
+                  username: $CLOUD_USR
+                  password: $CLOUD_PSW
+                  auth_url: 'https://auth.vexxhost.net/v3'
+                  user_domain_name: Default
+                  project_domain_name: Default
+                region_name: ca-ymq-1
+          customizedCredentialMappings:
+            - credentialsId: cloud-username-pass
+              tokenKey: CLOUD
+      - globalMavenSettings:
+          id: global-settings
+          name: global-settings
+          comment: Maven Global Settings
+          isReplaceAll: true
+          content: |
+            <?xml version="1.0" encoding="UTF-8"?>
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+              <mirrors>
+                <mirror>
+                  <id>opendaylight-release-mirror</id>
+                  <name>Local Nexus mirror for OpenDaylight builds</name>
+                  <url>^${env.ODLNEXUSPROXY}/content/repositories/public/</url>
+                  <mirrorOf>central</mirrorOf>
+                </mirror>
+              </mirrors>
+            </settings>
+      - mavenSettings:
+          id: odlparent-settings
+          name: odlparent-settings
+          comment: odlparent-settings
+          isReplaceAll: true
+          content: |
+            <?xml version="1.0" encoding="UTF-8"?>
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            </settings>
+          serverCredentialMappings:
+            - serverId: opendaylight-staging
+              credentialsId: ${MAVEN_DEPLOY_CREDENTIAL}
+            - serverId: opendaylight-snapshot
+              credentialsId: ${MAVEN_DEPLOY_CREDENTIAL}
+            - serverId: opendaylight-site
+              credentialsId: ${MAVEN_DEPLOY_CREDENTIAL}
+            - serverId: ossrh
+              credentialsId: ${MAVEN_OSSRH_CREDENTIAL}

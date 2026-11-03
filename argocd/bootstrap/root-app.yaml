@@ -1,0 +1,25 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Apply once on a new cluster after installing ArgoCD:
+#   kubectl apply -n argocd -f argocd/bootstrap/root-app.yaml
+# NOT applied anywhere yet: this repo is a prototype.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/askb/jenkins-gitops-generic.git
+    targetRevision: main
+    path: argocd/clusters/vexxhost
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

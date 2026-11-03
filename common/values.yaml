@@ -1,0 +1,102 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Values for the upstream jenkins/jenkins chart shared by every project.
+# Layering (later wins): chart defaults -> common/values.yaml ->
+# projects/<p>/values.yaml -> projects/<p>/envs/<env>/values.yaml.
+#
+# Helm replaces lists instead of merging them, so each list below is set in
+# this file only. Projects and envs override scalars and maps.
+#
+# JCasC is NOT set here: it ships as ConfigMaps from kustomize (common/,
+# projects/<p>/, features) and the chart's config-reload sidecar picks up
+# every ConfigMap labelled jenkins-jenkins-config=true.
+
+fullnameOverride: jenkins
+
+controller:
+  image:
+    registry: ghcr.io
+    tagLabel: ""
+    pullPolicy: IfNotPresent
+  # Plugins are baked into the image from projects/<p>/plugins.lock.txt.
+  installPlugins: false
+  installLatestPlugins: false
+  installLatestSpecifiedPlugins: false
+  initializeOnce: false
+  numExecutors: 0
+  executorMode: EXCLUSIVE
+
+  # Authentication comes from JCasC (SAML, or a local admin in CI).
+  admin:
+    createSecret: false
+
+  # Heap follows the container memory limit, so envs only size resources.
+  javaOpts: >-
+    -XX:MaxRAMPercentage=60
+    -XX:+UseG1GC
+    -Djenkins.install.runSetupWizard=false
+
+  # ${key} in JCasC reads /run/secrets/jcasc/<key> (synced by ESO).
+  # Plain ${UPPER_CASE} values come from the jenkins-env ConfigMap.
+  containerEnv:
+    - name: SECRETS
+      value: /run/secrets/jcasc
+  # Plain env for JCasC ${UPPER_CASE} references. Later entries win, so
+  # env-level jenkins-env overrides project defaults. Changes need a restart.
+  containerEnvFrom:
+    - configMapRef:
+        name: jenkins-env-project
+    - configMapRef:
+        name: jenkins-env
+
+  JCasC:
+    defaultConfig: false
+    configScripts: {}
+    # Without these the chart adds its own local-admin realm and authz
+    # ConfigMaps, which conflict with ours (ConfiguratorConflictException).
+    securityRealm: ""
+    authorizationStrategy: ""
+
+  sidecars:
+    configAutoReload:
+      enabled: true
+
+  probes:
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+
+  testEnabled: false
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      memory: "4Gi"
+
+agent:
+  # Agent clouds are defined in JCasC, not by the chart.
+  enabled: false
+
+persistence:
+  enabled: true
+  size: 20Gi
+  volumes:
+    - name: jcasc-secrets
+      secret:
+        secretName: jenkins-jcasc-secrets
+  mounts:
+    - name: jcasc-secrets
+      mountPath: /run/secrets/jcasc
+      readOnly: true
+
+rbac:
+  create: true
+  readSecrets: false
+
+serviceAccount:
+  create: true

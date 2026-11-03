@@ -1,0 +1,43 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+#
+# Global node env vars, from builder/jenkins-config/global-vars-<silo>.sh.
+# Values that differ per silo are ${UPPER_CASE} from the jenkins-env
+# ConfigMap (projects/odl/envs/<env>/kustomization.yaml).
+jenkins:
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: CONTAINER_PULL_REGISTRY
+            value: nexus3.opendaylight.org:10003
+          - key: CONTAINER_PUSH_REGISTRY
+            value: nexus3.opendaylight.org:10002
+          - key: DOCKER_REGISTRY
+            value: nexus3.opendaylight.org
+          - key: DOCKERHUB_REGISTRY
+            value: docker.io
+          - key: GERRIT_URL
+            value: https://git.opendaylight.org/gerrit
+          - key: GIT_BASE
+            value: git://devvexx.opendaylight.org/mirror/$PROJECT
+          - key: GIT_URL
+            value: git://devvexx.opendaylight.org/mirror
+          - key: JENKINS_HOSTNAME
+            value: ${JENKINS_HOSTNAME}
+          - key: NEXUS_URL
+            value: https://nexus.opendaylight.org
+          - key: ODLNEXUSPROXY
+            value: https://nexus.opendaylight.org
+          - key: REGISTRY_PORTS
+            value: 10001 10002 10003 10004
+          - key: SIGUL_KEY
+            value: ${SIGUL_KEY}
+          - key: SILO
+            value: ${SILO}
+          - key: SONAR_URL
+            value: https://sonar.opendaylight.org
+          - key: S3_BUCKET
+            value: odl-logs-s3-cloudfront-index
+          - key: CDN_URL
+            value: s3-logs.opendaylight.org
